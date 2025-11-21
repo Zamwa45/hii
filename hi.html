@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Black Theme Colors */
+            --bg-gradient-start: #2b2b2b;
+            --bg-gradient-end: #000000;
+            --card-bg: rgba(20, 20, 20, 0.85);
+            --text-main: #ffffff;
+            --text-secondary: #cccccc;
+            --accent-color: #ffffff; /* White text for title */
+            --btn-bg: #ffffff;
+            --btn-text: #000000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: radial-gradient(circle at center, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            font-family: 'Nunito', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px; /* Essential for 3D */
+            color: var(--text-main);
+        }
+
+        /* Floating Background Particles */
+        .bg-hearts {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .heart-particle {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.2); /* Subtle white hearts */
+            font-size: 20px;
+            animation: floatUp linear infinite;
+        }
+
+        /* The 3D Container */
+        .scene {
+            position: relative;
+            width: 90%;
+            max-width: 400px;
+            height: 550px; /* Slightly taller for the image */
+            z-index: 10;
+            transform-style: preserve-3d;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 30px 60px rgba(0,0,0,0.5), /* Deeper shadow for dark mode */
+                0 0 0 1px rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+            position: relative;
+        }
+
+        /* Panda Image Styling */
+        .image-container {
+            width: 180px;
+            height: 180px;
+            margin-bottom: 20px;
+            transform: translateZ(50px); /* Pops out in 3D */
+            position: relative;
+            border-radius: 50%;
+            padding: 5px;
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            animation: floatImage 4s ease-in-out infinite;
+        }
+
+        .panda-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.8);
+        }
+
+        /* 3D Typography */
+        h1 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 3.5rem;
+            color: var(--accent-color);
+            text-align: center;
+            line-height: 1;
+            margin-bottom: 10px;
+            transform: translateZ(80px); 
+            text-shadow: 
+                0px 0px 10px rgba(255, 255, 255, 0.3),
+                3px 3px 0px #333;
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: var(--btn-text);
+            margin-bottom: 30px;
+            transform: translateZ(40px);
+            font-weight: bold;
+            background: var(--text-main);
+            padding: 6px 20px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Action Button */
+        .btn {
+            padding: 15px 40px;
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            border: none;
+            border-radius: 50px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transform: translateZ(60px);
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px -5px rgba(255, 255, 255, 0.2);
+            outline: none;
+        }
+
+        .btn:hover {
+            transform: translateZ(70px) scale(1.05);
+            background: #f0f0f0;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+        }
+
+        .btn:active {
+            transform: translateZ(60px) scale(0.95);
+        }
+
+        /* Hidden Message */
+        .hidden-msg {
+            position: absolute;
+            bottom: 25px;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            opacity: 0;
+            transition: opacity 0.5s;
+            transform: translateZ(30px);
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* Animations */
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: translateY(-100px) scale(1); opacity: 0; }
+        }
+
+        @keyframes floatImage {
+            0%, 100% { transform: translateZ(50px) translateY(0); }
+            50% { transform: translateZ(50px) translateY(-15px); }
+        }
+
+        /* Confetti Canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        @media (max-width: 480px) {
+            h1 { font-size: 2.8rem; }
+            .scene { height: 500px; width: 85%; }
+            .image-container { width: 140px; height: 140px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-hearts" id="bgHearts"></div>
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="scene">
+        <div class="card" id="card">
+            <!-- Replaced CSS Character with Panda Image -->
+            <div class="image-container">
+                <!-- Switched to a Giant Panda (Black & White) -->
+                <img src="https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                     alt="Cute Giant Panda" 
+                     class="panda-img"
+                     onerror="this.src='https://placehold.co/200x200/black/white?text=Panda'">
+            </div>
+
+            <h1>خۆ توڕە<br>نی</h1>
+            <p>ئەگەر توڕەی تا بزانم کاکە؟</p>
+            
+            <button class="btn" id="forgiveBtn">Forgive Me?</button>
+            <div class="hidden-msg" id="successMsg" دستەکانت خۆش>زۆر سوپاس</div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. 3D Tilt Effect Logic ---
+        const card = document.getElementById('card');
+        const scene = document.querySelector('.scene');
+
+        document.addEventListener('mousemove', (e) => {
+            rotateCard(e.clientX, e.clientY);
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            rotateCard(touch.clientX, touch.clientY);
+        });
+
+        function rotateCard(x, y) {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            const xAxis = ((w / 2 - x) / 25); 
+            const yAxis = ((h / 2 - y) / 25);
+            card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        }
+
+        document.addEventListener('mouseleave', () => {
+            card.style.transform = `rotateY(0deg) rotateX(0deg)`;
+        });
+
+        // --- 2. Background Particles (White/Grey for Black Theme) ---
+        const bgContainer = document.getElementById('bgHearts');
+        const particles = ['🤍', '⭐', '✨', '🐼', '🌑'];
+
+        function createHeart() {
+            const p = document.createElement('div');
+            p.classList.add('heart-particle');
+            p.innerText = particles[Math.floor(Math.random() * particles.length)];
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.fontSize = (Math.random() * 15 + 10) + 'px';
+            const duration = Math.random() * 5 + 5;
+            p.style.animationDuration = duration + 's';
+            bgContainer.appendChild(p);
+            setTimeout(() => { p.remove(); }, duration * 1000);
+        }
+
+        setInterval(createHeart, 400);
+
+        // --- 3. Confetti Logic (Gold & Silver) ---
+        const button = document.getElementById('forgiveBtn');
+        const successMsg = document.getElementById('successMsg');
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let confettiParticles = [];
+
+        button.addEventListener('click', () => {
+            button.innerText = "Yeaaay! 🐼";
+            button.style.transform = "translateZ(60px) scale(1.1)";
+            successMsg.style.opacity = "1";
+            
+            // Trigger confetti burst
+            createConfetti();
+            animateConfetti();
+        });
+
+        function createConfetti() {
+            // Gold, Silver, White colors for dark theme
+            const colors = ['#ffffff', '#d4af37', '#c0c0c0', '#f0f0f0', '#e5e4e2'];
+            
+            for (let i = 0; i < 120; i++) {
+                confettiParticles.push({
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2,
+                    w: Math.random() * 8 + 4,
+                    h: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vx: (Math.random() - 0.5) * 25,
+                    vy: (Math.random() - 0.5) * 25 - 5,
+                    gravity: 0.4,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 10
+                });
+            }
+        }
+
+        function animateConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            confettiParticles.forEach((p, index) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity;
+                p.rotation += p.rotationSpeed;
+
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rotation * Math.PI / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                ctx.restore();
+
+                if (p.y > canvas.height) {
+                    confettiParticles.splice(index, 1);
+                }
+            });
+
+            if (confettiParticles.length > 0) {
+                requestAnimationFrame(animateConfetti);
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
